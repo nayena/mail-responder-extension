@@ -312,8 +312,126 @@
     }
   }
 
-  function onGenerate() {
-    showError("Drafting not wired up yet.");
+  // --- Claude drafting ----------------------------------------------------
+
+  const AVAILABILITY_RE = /\b(availab\w*|free|meet(ing)?|schedul\w*|calendar|call|chat|sync|catch up|time(s)? (to|that|work)|when (are|can|would|is|should)|let me know.*time|best time|propose.*time|suggest.*time)\b/i;
+
+  function formatEventForPrompt(ev) {
+    const start = ev.start && (ev.start.dateTime || ev.start.date);
+    const end = ev.end && (ev.end.dateTime || ev.end.date);
+    if (!start) return null;
+    const s = new Date(start);
+    if (isNaN(s.getTime())) return null;
+    const day = s.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+    if (ev.start.date && !ev.start.dateTime) {
+      return `• ${ev.summary || "(event)"}: ${day} (all day)`;
+    }
+    const sTime = s.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }).toLowerCase().replace(" ", "");
+    let eTime = "";
+    if (end) {
+      const e = new Date(end);
+      if (!isNaN(e.getTime())) {
+        eTime = e.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }).toLowerCase().replace(" ", "");
+      }
+    }
+    const range = eTime ? `${sTime} – ${eTime}` : sTime;
+    return `• ${ev.summary || "(event)"}: ${day}, ${range}`;
+  }
+
+  function buildUserPrompt({ email, tone, instruction, events, includeAvailability }) {
+    const parts = [];
+    parts.push(`Incoming email:`);
+    const from = email.fromName
+      ? `${email.fromName}${email.fromEmail ? ` <${email.fromEmail}>` : ""}`
+      : (email.fromEmail || "(unknown sender)");
+    parts.push(`From: ${from}`);
+    parts.push(`Subject: ${email.subject || "(no subject)"}`);
+    parts.push(`Body:\n${email.body || "(empty)"}`);
+    parts.push("");
+    parts.push(`Tone: ${tone}`);
+    if (instruction) parts.push(`Custom instruction from me: ${instruction}`);
+
+    if (events && events.length) {
+      const bullets = events.map(formatEventForPrompt).filter(Boolean).join("\n");
+      parts.push("");
+      parts.push("My calendar for the next 7 days (busy blocks):");
+      parts.push(bullets || "(none)");
+      if (includeAvailability) {
+        parts.push("");
+        parts.push("This email appears to ask about availability. Reference my calendar above and propose specific free slots — weekdays 9:00am–6:00pm local time are preferred. Avoid anything that collides with the busy blocks. Offer 2–3 concrete options (weekday, date, and time range).");
+      }
+    }
+
+    parts.push("");
+    parts.push("Write the reply now. Return only the reply body.");
+    return parts.join("\n");
+  }
+
+  async function onGenerate() {
+    if (state.busy) return;
+
+    if (!state.apiKey) {
+      showError("Add your Anthropic API key below, then try again.");
+      return;
+    }
+    if (!state.email.subject && !state.email.body) {
+      showError("Open an email first — I couldn't find one on the page.");
+      return;
+    }
+
+    const instructionEl = panelEl.querySelector(".rf-instruction");
+    const instruction = (instructionEl.value || "").trim();
+    const asksAboutAvailability = AVAILABILITY_RE.test(`${state.email.subject} ${state.email.body}`);
+
+    const systemPrompt = "You are an expert email assistant. Write clear, natural email replies. Return ONLY the reply body — no subject line, no preamble.";
+    const userPrompt = buildUserPrompt({
+      email: state.email,
+      tone: state.tone,
+      instruction,
+      events: state.useCalendar ? state.events : [],
+      includeAvailability: state.useCalendar && asksAboutAvailability,
+    });
+
+    const generateBtn = panelEl.querySelector(".rf-generate");
+    const draftSection = panelEl.querySelector(".rf-draft-section");
+    const draftEl = panelEl.querySelector(".rf-draft");
+
+    state.busy = true;
+    showError("");
+    generateBtn.disabled = true;
+    const prevLabel = generateBtn.textContent;
+    generateBtn.textContent = "Drafting…";
+
+    try {
+      const res = await sendMessage({
+        type: "CALL_CLAUDE",
+        apiKey: state.apiKey,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }],
+        model: "claude-opus-4-5",
+        max_tokens: 1024,
+      });
+      const text = extractClaudeText(res.data);
+      if (!text) throw new Error("Claude returned no text.");
+      state.draft = text;
+      draftSection.style.display = "block";
+      draftEl.value = text;
+    } catch (err) {
+      showError(err.message || String(err));
+    } finally {
+      state.busy = false;
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = "&#10022; Generate draft";
+    }
+  }
+
+  function extractClaudeText(data) {
+    if (!data || !Array.isArray(data.content)) return "";
+    return data.content
+      .filter((b) => b && b.type === "text" && typeof b.text === "string")
+      .map((b) => b.text)
+      .join("\n")
+      .trim();
   }
 
   function onCopy() {}
