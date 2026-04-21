@@ -255,11 +255,61 @@
     });
   }
 
-  // --- Stubs (filled in later commits) ------------------------------------
+  // --- Messaging ----------------------------------------------------------
 
-  function onCalendarToggle(e) {
+  function sendMessage(payload) {
+    return new Promise((resolve, reject) => {
+      try {
+        chrome.runtime.sendMessage(payload, (res) => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+            return;
+          }
+          if (!res) {
+            reject(new Error("No response from background"));
+            return;
+          }
+          if (!res.ok) {
+            reject(new Error(res.error || "Unknown error"));
+            return;
+          }
+          resolve(res);
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  // --- Calendar -----------------------------------------------------------
+
+  async function onCalendarToggle(e) {
     state.useCalendar = e.target.checked;
-    renderEvents();
+    const wrap = panelEl.querySelector(".rf-events");
+    if (!state.useCalendar) {
+      state.events = [];
+      renderEvents();
+      return;
+    }
+    showError("");
+    wrap.style.display = "block";
+    wrap.innerHTML = `<div class="rf-event-time">Loading calendar…</div>`;
+    try {
+      const tokRes = await sendMessage({ type: "GET_AUTH_TOKEN", interactive: true });
+      const calRes = await sendMessage({ type: "FETCH_CALENDAR", token: tokRes.token });
+      state.events = calRes.events || [];
+      renderEvents();
+      if (!state.events.length) {
+        wrap.style.display = "block";
+        wrap.innerHTML = `<div class="rf-event-time">No events in the next 7 days.</div>`;
+      }
+    } catch (err) {
+      state.useCalendar = false;
+      e.target.checked = false;
+      wrap.style.display = "none";
+      wrap.innerHTML = "";
+      showError("Calendar: " + err.message);
+    }
   }
 
   function onGenerate() {
