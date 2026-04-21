@@ -434,8 +434,84 @@
       .trim();
   }
 
-  function onCopy() {}
-  function onInsert() {}
+  // --- Copy / Insert ------------------------------------------------------
+
+  function flashSuccess(btn, label) {
+    const prev = btn.textContent;
+    btn.textContent = label;
+    btn.classList.add("rf-success");
+    setTimeout(() => {
+      btn.textContent = prev;
+      btn.classList.remove("rf-success");
+    }, 2000);
+  }
+
+  function currentDraft() {
+    const el = panelEl.querySelector(".rf-draft");
+    return el ? el.value : "";
+  }
+
+  async function onCopy() {
+    const text = currentDraft();
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      flashSuccess(panelEl.querySelector(".rf-copy"), "✓ Copied");
+    } catch (err) {
+      showError("Copy failed: " + (err.message || err));
+    }
+  }
+
+  function findReplyButton() {
+    return (
+      document.querySelector('[data-tooltip="Reply"]') ||
+      document.querySelector('button[aria-label="Reply"]') ||
+      document.querySelector('[aria-label^="Reply"]')
+    );
+  }
+
+  function findComposeBody() {
+    return (
+      document.querySelector('[aria-label="Message Body"]') ||
+      document.querySelector('.Am.Al.editable') ||
+      document.querySelector('[contenteditable="true"][role="textbox"]')
+    );
+  }
+
+  function wait(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function onInsert() {
+    const text = currentDraft();
+    if (!text) return;
+    const insertBtn = panelEl.querySelector(".rf-insert");
+
+    try {
+      let composeBody = findComposeBody();
+      if (!composeBody) {
+        const replyBtn = findReplyButton();
+        if (replyBtn) {
+          replyBtn.click();
+          await wait(600);
+          composeBody = findComposeBody();
+        }
+      }
+      if (!composeBody) throw new Error("Couldn't find the Gmail reply editor.");
+
+      composeBody.focus();
+      composeBody.innerHTML = escapeHtml(text).replace(/\n/g, "<br>");
+      composeBody.dispatchEvent(new InputEvent("input", { bubbles: true, cancelable: true }));
+      flashSuccess(insertBtn, "✓ Inserted");
+    } catch (err) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showError(`${err.message} Copied to clipboard instead — paste into the reply.`);
+      } catch {
+        showError(err.message || String(err));
+      }
+    }
+  }
 
   function showError(msg) {
     const el = panelEl.querySelector(".rf-error");
