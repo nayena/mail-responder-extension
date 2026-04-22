@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Reply Fast — UI preview</title>
+  <link rel="stylesheet" href="panel.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: #1a1a1a;
+      font-family: -apple-system, system-ui, sans-serif;
+    }
+    .fake-gmail {
+      position: fixed;
+      inset: 0;
+      background: #181818;
+      color: #888;
+    }
+    .fake-gmail::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 56px;
+      background: #202020;
+    }
+    .fake-gmail .topbar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      color: #aaa;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .fake-gmail .inbox {
+      position: absolute;
+      top: 72px;
+      left: 24px;
+      width: 260px;
+      font-size: 12.5px;
+      line-height: 1.9;
+      color: #777;
+    }
+    .fake-gmail .inbox .row { padding: 6px 10px; border-bottom: 1px solid #242424; }
+    .fake-gmail .inbox .row.active { background: #232323; color: #c8c8c8; }
+    .fake-gmail .mail {
+      position: absolute;
+      top: 72px;
+      left: 300px;
+      right: 440px;
+      padding: 8px 32px;
+      color: #bbb;
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+    .fake-gmail .mail h1 {
+      color: #ddd;
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      margin: 12px 0 24px;
+    }
+    .fake-gmail .mail .sender { color: #888; font-size: 12.5px; margin-bottom: 12px; }
+    .fake-gmail .mail p { margin: 10px 0; }
+    .note {
+      position: fixed;
+      left: 24px;
+      bottom: 16px;
+      color: #555;
+      font-size: 11px;
+      font-family: Georgia, serif;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="fake-gmail">
+    <div class="topbar">Gmail (mock)</div>
+    <div class="inbox">
+      <div class="row active">Priya Shah — Can we find time next week?</div>
+      <div class="row">Stripe — Your receipt</div>
+      <div class="row">Mom — dinner sunday?</div>
+      <div class="row">GitHub — [reply-fast] 3 new issues</div>
+      <div class="row">Figma — weekly digest</div>
+    </div>
+    <div class="mail">
+      <h1>Can we find time next week?</h1>
+      <div class="sender">Priya Shah &lt;priya@acme.co&gt; — 10:24 AM</div>
+      <p>Hi — hope you're well! I'd love to catch up for 30 minutes next week to talk through the Q3 research plan. Any chance you have availability Tuesday or Wednesday afternoon? Happy to work around your schedule.</p>
+      <p>Thanks,<br>Priya</p>
+    </div>
+  </div>
+
+  <!-- floating trigger -->
+  <button id="reply-fast-trigger" class="rf-open" type="button" aria-label="Open Reply Fast">✦</button>
+
+  <!-- panel (pre-opened for preview) -->
+  <div id="reply-fast-panel" class="rf-open">
+    <div class="rf-header">
+      <div class="rf-header-left"><span class="rf-dot"></span><span>Reply Fast</span></div>
+      <button class="rf-close" type="button" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="rf-body">
+      <div class="rf-section">
+        <div class="rf-section-label">Current email</div>
+        <div class="rf-context">
+          <div class="rf-context-subject">Can we find time next week?</div>
+          <div class="rf-context-from">from Priya Shah</div>
+        </div>
+      </div>
+
+      <div class="rf-section">
+        <div class="rf-section-label">Tone</div>
+        <div class="rf-tones">
+          <button class="rf-tone rf-active" data-tone="Professional" type="button">Professional</button>
+          <button class="rf-tone" data-tone="Friendly" type="button">Friendly</button>
+          <button class="rf-tone" data-tone="Brief" type="button">Brief</button>
+          <button class="rf-tone" data-tone="Formal" type="button">Formal</button>
+        </div>
+      </div>
+
+      <div class="rf-section">
+        <div class="rf-section-label">Custom instruction</div>
+        <textarea class="rf-textarea rf-instruction" placeholder="e.g. 'decline politely', 'ask for more details', or leave blank to auto-draft"></textarea>
+      </div>
+
+      <div class="rf-section">
+        <label class="rf-checkbox-row">
+          <input type="checkbox" class="rf-checkbox rf-calendar-toggle" checked>
+          <span class="rf-checkbox-label">Check my calendar availability</span>
+        </label>
+        <div class="rf-events" style="display:block">
+          <div class="rf-event"><span class="rf-event-name">Design sync</span> &middot; <span class="rf-event-time">Tue, Apr 22, 9:30 AM</span></div>
+          <div class="rf-event"><span class="rf-event-name">1:1 with Noor</span> &middot; <span class="rf-event-time">Tue, Apr 22, 2:00 PM</span></div>
+          <div class="rf-event"><span class="rf-event-name">Research review</span> &middot; <span class="rf-event-time">Wed, Apr 23, 11:00 AM</span></div>
+          <div class="rf-event"><span class="rf-event-name">Lunch — Dan</span> &middot; <span class="rf-event-time">Wed, Apr 23, 12:30 PM</span></div>
+          <div class="rf-event"><span class="rf-event-name">Quarterly planning</span> &middot; <span class="rf-event-time">Thu, Apr 24, 10:00 AM</span></div>
+        </div>
+      </div>
+
+      <div class="rf-section">
+        <button class="rf-generate" type="button">&#10022; Generate draft</button>
+      </div>
+
+      <div class="rf-section rf-draft-section" style="display:block">
+        <div class="rf-section-label">Draft</div>
+        <textarea class="rf-textarea rf-draft">Hi Priya,
+
+Happy to find time next week. Looking at my calendar, Tuesday afternoon after 3:00 PM works, or Wednesday between 1:30 and 3:30 PM. Let me know which slot suits you and I'll send an invite.
+
+Best,
+—</textarea>
+        <div class="rf-actions">
+          <button class="rf-action rf-copy" type="button">Copy</button>
+          <button class="rf-action rf-insert" type="button">Insert in Gmail</button>
+          <button class="rf-action rf-redo" type="button">&#8634; Redo</button>
+        </div>
+      </div>
+
+      <div class="rf-error"></div>
+    </div>
+
+    <div class="rf-settings">
+      <div class="rf-section-label">Gemini API key</div>
+      <div class="rf-settings-row">
+        <input type="password" class="rf-input rf-api-key" placeholder="••••••••••••••••" autocomplete="off">
+        <button class="rf-save" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">preview only — real panel is injected into Gmail by content.js</div>
+</body>
+</html>
