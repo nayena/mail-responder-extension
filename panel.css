@@ -30,11 +30,55 @@
   right: 440px;
 }
 
+/* ---- Theme tokens ------------------------------------------------------ */
+
+#reply-fast-panel {
+  --rf-bg: #0e0e0e;
+  --rf-surface: #141414;
+  --rf-border: #1e1e1e;
+  --rf-divider: #1a1a1a;
+  --rf-border-hover: #3a3a3a;
+  --rf-text: #e0ddd6;
+  --rf-text-muted: #555;
+  --rf-text-soft: #a8a39a;
+  --rf-accent: #d4a843;
+  --rf-accent-hover: #e0b85a;
+  --rf-accent-text: #0e0e0e;
+  --rf-success: #70c070;
+  --rf-success-border: #2a3a2a;
+  --rf-error-bg: rgba(200, 70, 70, 0.08);
+  --rf-error-border: rgba(200, 70, 70, 0.35);
+  --rf-error-text: #d08080;
+  --rf-scrollbar: #1e1e1e;
+}
+
+#reply-fast-panel.rf-theme-light {
+  --rf-bg: #f7f4ec;
+  --rf-surface: #fffcf3;
+  --rf-border: #e5dfd1;
+  --rf-divider: #ece6d6;
+  --rf-border-hover: #c9bfa7;
+  --rf-text: #2a2620;
+  --rf-text-muted: #8a8275;
+  --rf-text-soft: #6a6358;
+  --rf-accent: #b8902e;
+  --rf-accent-hover: #c99e32;
+  --rf-accent-text: #fffcf3;
+  --rf-success: #2e7a2e;
+  --rf-success-border: #b8d8b8;
+  --rf-error-bg: rgba(180, 50, 50, 0.08);
+  --rf-error-border: rgba(180, 50, 50, 0.35);
+  --rf-error-text: #aa4040;
+  --rf-scrollbar: #d5cdb8;
+}
+
+/* ---- Panel ------------------------------------------------------------- */
+
 #reply-fast-panel,
 #reply-fast-panel * {
   box-sizing: border-box;
   font-family: Georgia, serif;
-  color: #e0ddd6;
+  color: var(--rf-text);
 }
 
 #reply-fast-panel {
@@ -43,12 +87,14 @@
   right: -420px;
   width: 400px;
   height: 100vh;
-  background: #0e0e0e;
-  border-left: 1px solid #1e1e1e;
+  background: var(--rf-bg);
+  border-left: 1px solid var(--rf-border);
   z-index: 2147483647;
   display: flex;
   flex-direction: column;
-  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.2s ease,
+              border-color 0.2s ease;
   font-size: 13px;
 }
 #reply-fast-panel.rf-open { right: 0; }
@@ -58,7 +104,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 18px;
-  border-bottom: 1px solid #1a1a1a;
+  border-bottom: 1px solid var(--rf-divider);
   flex-shrink: 0;
 }
 #reply-fast-panel .rf-header-left {
@@ -69,24 +115,31 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
+#reply-fast-panel .rf-header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 #reply-fast-panel .rf-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #d4a843;
+  background: var(--rf-accent);
   display: inline-block;
 }
-#reply-fast-panel .rf-close {
+#reply-fast-panel .rf-icon-btn {
   background: transparent;
   border: none;
-  color: #555;
-  font-size: 15px;
+  color: var(--rf-text-muted);
+  font-size: 14px;
   cursor: pointer;
   padding: 4px 8px;
   font-family: Georgia, serif;
+  line-height: 1;
   transition: color 0.15s ease;
 }
-#reply-fast-panel .rf-close:hover { color: #e0ddd6; }
+#reply-fast-panel .rf-icon-btn:hover { color: var(--rf-text); }
+#reply-fast-panel .rf-close { font-size: 15px; }
 
 #reply-fast-panel .rf-body {
   flex: 1;
@@ -94,7 +147,10 @@
   padding: 18px;
 }
 #reply-fast-panel .rf-body::-webkit-scrollbar { width: 6px; }
-#reply-fast-panel .rf-body::-webkit-scrollbar-thumb { background: #1e1e1e; border-radius: 3px; }
+#reply-fast-panel .rf-body::-webkit-scrollbar-thumb {
+  background: var(--rf-scrollbar);
+  border-radius: 3px;
+}
 
 #reply-fast-panel .rf-section {
   margin-bottom: 20px;
@@ -103,14 +159,14 @@
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #555;
+  color: var(--rf-text-muted);
   margin-bottom: 8px;
 }
 
 #reply-fast-panel .rf-context {
   padding: 12px 14px;
-  background: #141414;
-  border: 1px solid #1e1e1e;
+  background: var(--rf-surface);
+  border: 1px solid var(--rf-border);
   border-radius: 4px;
 }
 #reply-fast-panel .rf-context-subject {
@@ -121,10 +177,10 @@
 }
 #reply-fast-panel .rf-context-from {
   font-size: 12px;
-  color: #555;
+  color: var(--rf-text-muted);
 }
 #reply-fast-panel .rf-context.rf-empty .rf-context-subject {
-  color: #555;
+  color: var(--rf-text-muted);
   font-style: italic;
 }
 
@@ -135,9 +191,9 @@
 }
 #reply-fast-panel .rf-tone {
   padding: 8px 4px;
-  background: #141414;
-  border: 1px solid #1e1e1e;
-  color: #e0ddd6;
+  background: var(--rf-surface);
+  border: 1px solid var(--rf-border);
+  color: var(--rf-text);
   font-family: Georgia, serif;
   font-size: 11px;
   letter-spacing: 0.08em;
@@ -146,20 +202,20 @@
   border-radius: 3px;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-#reply-fast-panel .rf-tone:hover { border-color: #3a3a3a; }
+#reply-fast-panel .rf-tone:hover { border-color: var(--rf-border-hover); }
 #reply-fast-panel .rf-tone.rf-active {
-  background: #d4a843;
-  color: #0e0e0e;
-  border-color: #d4a843;
+  background: var(--rf-accent);
+  color: var(--rf-accent-text);
+  border-color: var(--rf-accent);
 }
 
 #reply-fast-panel .rf-textarea,
 #reply-fast-panel .rf-input {
   width: 100%;
-  background: #141414;
-  border: 1px solid #1e1e1e;
+  background: var(--rf-surface);
+  border: 1px solid var(--rf-border);
   border-radius: 4px;
-  color: #e0ddd6;
+  color: var(--rf-text);
   font-family: Georgia, serif;
   font-size: 13px;
   padding: 10px 12px;
@@ -169,10 +225,13 @@
 }
 #reply-fast-panel .rf-textarea { min-height: 60px; }
 #reply-fast-panel .rf-textarea:focus,
-#reply-fast-panel .rf-input:focus { border-color: #d4a843; }
+#reply-fast-panel .rf-input:focus { border-color: var(--rf-accent); }
 
 #reply-fast-panel .rf-textarea::placeholder,
-#reply-fast-panel .rf-input::placeholder { color: #555; font-style: italic; }
+#reply-fast-panel .rf-input::placeholder {
+  color: var(--rf-text-muted);
+  font-style: italic;
+}
 
 #reply-fast-panel .rf-checkbox-row {
   display: flex;
@@ -184,7 +243,7 @@
 #reply-fast-panel .rf-checkbox {
   width: 14px;
   height: 14px;
-  accent-color: #d4a843;
+  accent-color: var(--rf-accent);
   cursor: pointer;
 }
 #reply-fast-panel .rf-checkbox-label {
@@ -194,24 +253,24 @@
 #reply-fast-panel .rf-events {
   margin-top: 10px;
   padding: 10px 12px;
-  background: #141414;
-  border: 1px solid #1e1e1e;
+  background: var(--rf-surface);
+  border: 1px solid var(--rf-border);
   border-radius: 4px;
   font-size: 12px;
   line-height: 1.55;
-  color: #a8a39a;
+  color: var(--rf-text-soft);
   max-height: 180px;
   overflow-y: auto;
 }
 #reply-fast-panel .rf-event { padding: 2px 0; }
-#reply-fast-panel .rf-event-name { color: #e0ddd6; }
-#reply-fast-panel .rf-event-time { color: #555; font-size: 11px; }
+#reply-fast-panel .rf-event-name { color: var(--rf-text); }
+#reply-fast-panel .rf-event-time { color: var(--rf-text-muted); font-size: 11px; }
 
 #reply-fast-panel .rf-generate {
   width: 100%;
   padding: 12px;
-  background: #d4a843;
-  color: #0e0e0e;
+  background: var(--rf-accent);
+  color: var(--rf-accent-text);
   border: none;
   border-radius: 4px;
   font-family: Georgia, serif;
@@ -221,7 +280,7 @@
   cursor: pointer;
   transition: background 0.2s ease, opacity 0.2s ease;
 }
-#reply-fast-panel .rf-generate:hover:not(:disabled) { background: #e0b85a; }
+#reply-fast-panel .rf-generate:hover:not(:disabled) { background: var(--rf-accent-hover); }
 #reply-fast-panel .rf-generate:disabled { opacity: 0.6; cursor: default; }
 
 #reply-fast-panel .rf-draft {
@@ -238,9 +297,9 @@
 #reply-fast-panel .rf-action {
   flex: 1;
   padding: 9px 8px;
-  background: #141414;
-  border: 1px solid #1e1e1e;
-  color: #e0ddd6;
+  background: var(--rf-surface);
+  border: 1px solid var(--rf-border);
+  color: var(--rf-text);
   font-family: Georgia, serif;
   font-size: 10px;
   letter-spacing: 0.12em;
@@ -249,18 +308,18 @@
   border-radius: 3px;
   transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
-#reply-fast-panel .rf-action:hover { border-color: #3a3a3a; }
+#reply-fast-panel .rf-action:hover { border-color: var(--rf-border-hover); }
 #reply-fast-panel .rf-action.rf-success {
-  color: #70c070;
-  border-color: #2a3a2a;
+  color: var(--rf-success);
+  border-color: var(--rf-success-border);
 }
 
 #reply-fast-panel .rf-error {
   margin-top: 12px;
   padding: 10px 12px;
-  background: rgba(200, 70, 70, 0.08);
-  border: 1px solid rgba(200, 70, 70, 0.35);
-  color: #d08080;
+  background: var(--rf-error-bg);
+  border: 1px solid var(--rf-error-border);
+  color: var(--rf-error-text);
   border-radius: 4px;
   font-size: 12px;
   line-height: 1.5;
@@ -269,9 +328,9 @@
 #reply-fast-panel .rf-error.rf-show { display: block; }
 
 #reply-fast-panel .rf-settings {
-  border-top: 1px solid #1a1a1a;
+  border-top: 1px solid var(--rf-divider);
   padding: 14px 18px 16px;
-  background: #0e0e0e;
+  background: var(--rf-bg);
   flex-shrink: 0;
 }
 #reply-fast-panel .rf-settings-row {
@@ -286,9 +345,9 @@
 }
 #reply-fast-panel .rf-save {
   padding: 0 14px;
-  background: #141414;
-  border: 1px solid #1e1e1e;
-  color: #e0ddd6;
+  background: var(--rf-surface);
+  border: 1px solid var(--rf-border);
+  color: var(--rf-text);
   font-family: Georgia, serif;
   font-size: 10px;
   letter-spacing: 0.14em;
@@ -297,5 +356,8 @@
   border-radius: 4px;
   transition: border-color 0.15s ease, color 0.15s ease;
 }
-#reply-fast-panel .rf-save:hover { border-color: #3a3a3a; }
-#reply-fast-panel .rf-save.rf-success { color: #70c070; border-color: #2a3a2a; }
+#reply-fast-panel .rf-save:hover { border-color: var(--rf-border-hover); }
+#reply-fast-panel .rf-save.rf-success {
+  color: var(--rf-success);
+  border-color: var(--rf-success-border);
+}

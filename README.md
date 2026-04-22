@@ -82,6 +82,9 @@ No billing setup required.
 7. Click **Insert in Gmail** to drop it into the reply editor, or
    **Copy** to clipboard, or **↺ Redo** to regenerate.
 
+The sun/moon icon at the top-right of the panel toggles between dark
+and light themes. Your choice is remembered across sessions.
+
 ## Notes
 
 - Reply Fast only runs on `https://mail.google.com/*`. It has no

@@ -102,7 +102,10 @@
   <div id="reply-fast-panel" class="rf-open">
     <div class="rf-header">
       <div class="rf-header-left"><span class="rf-dot"></span><span>Reply Fast</span></div>
-      <button class="rf-close" type="button" aria-label="Close">&#x2715;</button>
+      <div class="rf-header-right">
+        <button class="rf-icon-btn rf-theme-toggle" type="button" aria-label="Toggle theme">&#9788;</button>
+        <button class="rf-icon-btn rf-close" type="button" aria-label="Close">&#x2715;</button>
+      </div>
     </div>
     <div class="rf-body">
       <div class="rf-section">
@@ -174,5 +177,11 @@ Best,
   </div>
 
   <div class="note">preview only — real panel is injected into Gmail by content.js</div>
+  <script>
+    // Honor ?theme=light to render the light variant (used for screenshots).
+    const panel = document.getElementById("reply-fast-panel");
+    const params = new URLSearchParams(location.search);
+    if (params.get("theme") === "light") panel.classList.add("rf-theme-light");
+  </script>
 </body>
 </html>

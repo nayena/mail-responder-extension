@@ -5,6 +5,7 @@
 
   const TONES = ["Professional", "Friendly", "Brief", "Formal"];
   const STORAGE_KEY = "rf_api_key";
+  const THEME_KEY = "rf_theme";
 
   const state = {
     tone: "Professional",
@@ -14,6 +15,7 @@
     apiKey: "",
     draft: "",
     busy: false,
+    theme: "dark",
   };
 
   let panelEl = null;
@@ -123,7 +125,10 @@
     panelEl.innerHTML = `
       <div class="rf-header">
         <div class="rf-header-left"><span class="rf-dot"></span><span>Reply Fast</span></div>
-        <button class="rf-close" type="button" aria-label="Close">&#x2715;</button>
+        <div class="rf-header-right">
+          <button class="rf-icon-btn rf-theme-toggle" type="button" aria-label="Toggle theme" title="Toggle theme">&#9788;</button>
+          <button class="rf-icon-btn rf-close" type="button" aria-label="Close">&#x2715;</button>
+        </div>
       </div>
       <div class="rf-body">
         <div class="rf-section">
@@ -200,8 +205,40 @@
     panelEl.querySelector(".rf-redo").addEventListener("click", onGenerate);
 
     panelEl.querySelector(".rf-save").addEventListener("click", onSaveApiKey);
+    panelEl.querySelector(".rf-theme-toggle").addEventListener("click", toggleTheme);
 
     loadApiKey();
+    loadTheme();
+  }
+
+  function applyTheme(theme) {
+    state.theme = theme === "light" ? "light" : "dark";
+    if (!panelEl) return;
+    panelEl.classList.toggle("rf-theme-light", state.theme === "light");
+    const btn = panelEl.querySelector(".rf-theme-toggle");
+    if (btn) {
+      // Show the icon of the OTHER mode — i.e. what clicking will switch to.
+      btn.innerHTML = state.theme === "dark" ? "&#9788;" : "&#9790;";
+      btn.setAttribute(
+        "aria-label",
+        state.theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+      );
+    }
+  }
+
+  function loadTheme() {
+    chrome.storage.local.get(THEME_KEY, (res) => {
+      if (chrome.runtime.lastError) { applyTheme("dark"); return; }
+      applyTheme(res && res[THEME_KEY] === "light" ? "light" : "dark");
+    });
+  }
+
+  function toggleTheme() {
+    const next = state.theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    chrome.storage.local.set({ [THEME_KEY]: next }, () => {
+      void chrome.runtime.lastError;
+    });
   }
 
   function togglePanel() {
