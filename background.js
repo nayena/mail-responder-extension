@@ -1,4 +1,4 @@
-// Reply Fast — service worker. Handles OAuth, Google Calendar, and Claude API.
+// Reply Fast — service worker. Handles OAuth, Google Calendar, and Gemini API.
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Reply Fast installed.");
@@ -23,8 +23,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         .catch((err) => sendResponse({ ok: false, error: String(err && err.message || err) }));
       return true;
 
-    case "CALL_CLAUDE":
-      callClaude(msg)
+    case "CALL_GEMINI":
+      callGemini(msg)
         .then((data) => sendResponse({ ok: true, data }))
         .catch((err) => sendResponse({ ok: false, error: String(err && err.message || err) }));
       return true;
@@ -78,27 +78,36 @@ async function fetchCalendar(token) {
   return Array.isArray(json.items) ? json.items : [];
 }
 
-async function callClaude({ apiKey, system, messages, model, max_tokens }) {
-  if (!apiKey) throw new Error("Missing Anthropic API key");
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+async function callGemini({ apiKey, system, userText, model, maxOutputTokens }) {
+  if (!apiKey) throw new Error("Missing Gemini API key");
+  const chosenModel = model || "gemini-2.5-flash";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(chosenModel)}:generateContent`;
+
+  const body = {
+    contents: [
+      { role: "user", parts: [{ text: userText || "" }] },
+    ],
+    generationConfig: {
+      maxOutputTokens: maxOutputTokens || 1024,
+      temperature: 0.7,
+    },
+  };
+  if (system) {
+    body.systemInstruction = { parts: [{ text: system }] };
+  }
+
+  const res = await fetch(url, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true",
+      "x-goog-api-key": apiKey,
     },
-    body: JSON.stringify({
-      model: model || "claude-opus-4-5",
-      max_tokens: max_tokens || 1024,
-      system: system || "",
-      messages: messages || [],
-    }),
+    body: JSON.stringify(body),
   });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const msg = (json && json.error && json.error.message) || res.statusText || "Claude API error";
-    throw new Error(`Claude API ${res.status}: ${msg}`);
+    const msg = (json && json.error && json.error.message) || res.statusText || "Gemini API error";
+    throw new Error(`Gemini API ${res.status}: ${msg}`);
   }
   return json;
 }

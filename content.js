@@ -172,9 +172,9 @@
       </div>
 
       <div class="rf-settings">
-        <div class="rf-section-label">Anthropic API key</div>
+        <div class="rf-section-label">Gemini API key</div>
         <div class="rf-settings-row">
-          <input type="password" class="rf-input rf-api-key" placeholder="sk-ant-..." autocomplete="off">
+          <input type="password" class="rf-input rf-api-key" placeholder="AIza..." autocomplete="off">
           <button class="rf-save" type="button">Save</button>
         </div>
       </div>
@@ -312,7 +312,7 @@
     }
   }
 
-  // --- Claude drafting ----------------------------------------------------
+  // --- Gemini drafting ----------------------------------------------------
 
   const AVAILABILITY_RE = /\b(availab\w*|free|meet(ing)?|schedul\w*|calendar|call|chat|sync|catch up|time(s)? (to|that|work)|when (are|can|would|is|should)|let me know.*time|best time|propose.*time|suggest.*time)\b/i;
 
@@ -371,7 +371,7 @@
     if (state.busy) return;
 
     if (!state.apiKey) {
-      showError("Add your Anthropic API key below, then try again.");
+      showError("Add your Gemini API key below, then try again.");
       return;
     }
     if (!state.email.subject && !state.email.body) {
@@ -404,15 +404,15 @@
 
     try {
       const res = await sendMessage({
-        type: "CALL_CLAUDE",
+        type: "CALL_GEMINI",
         apiKey: state.apiKey,
         system: systemPrompt,
-        messages: [{ role: "user", content: userPrompt }],
-        model: "claude-opus-4-5",
-        max_tokens: 1024,
+        userText: userPrompt,
+        model: "gemini-2.5-flash",
+        maxOutputTokens: 1024,
       });
-      const text = extractClaudeText(res.data);
-      if (!text) throw new Error("Claude returned no text.");
+      const text = extractGeminiText(res.data);
+      if (!text) throw new Error("Gemini returned no text.");
       state.draft = text;
       draftSection.style.display = "block";
       draftEl.value = text;
@@ -425,11 +425,13 @@
     }
   }
 
-  function extractClaudeText(data) {
-    if (!data || !Array.isArray(data.content)) return "";
-    return data.content
-      .filter((b) => b && b.type === "text" && typeof b.text === "string")
-      .map((b) => b.text)
+  function extractGeminiText(data) {
+    if (!data || !Array.isArray(data.candidates) || !data.candidates.length) return "";
+    const parts = data.candidates[0]?.content?.parts;
+    if (!Array.isArray(parts)) return "";
+    return parts
+      .filter((p) => p && typeof p.text === "string")
+      .map((p) => p.text)
       .join("\n")
       .trim();
   }

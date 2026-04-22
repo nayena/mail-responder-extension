@@ -1,13 +1,13 @@
 # Reply Fast
 
 An AI-powered Gmail assistant. Open any email in Gmail, click the ✦
-floating button, and draft a reply with Claude in one click. If the
-email asks about availability, Reply Fast checks your Google Calendar
-and weaves real free/busy slots into the reply.
+floating button, and draft a reply with Google Gemini in one click.
+If the email asks about availability, Reply Fast checks your Google
+Calendar and weaves real free/busy slots into the reply.
 
 - Manifest V3 Chrome extension
 - Plain JS / HTML / CSS — no build step, no bundler
-- Anthropic Claude for drafting (direct REST call from the service worker)
+- Google Gemini (AI Studio) for drafting — has a free tier
 - Google Calendar read-only for availability checks
 
 ## Install
@@ -54,13 +54,18 @@ need a Google OAuth client ID bound to your extension's ID.
 7. In `chrome://extensions`, click the refresh icon on Reply Fast so
    Chrome picks up the new manifest.
 
-## Configure your Anthropic API key
+## Configure your Gemini API key
 
-1. Grab an API key from [console.anthropic.com](https://console.anthropic.com/).
-2. Open Gmail. Click the gold **✦** button at the bottom-right.
-3. At the bottom of the side panel under **Anthropic API key**, paste
-   the key and hit **Save**. It's stored in `chrome.storage.local` and
+1. Go to [Google AI Studio](https://aistudio.google.com/apikey) and
+   sign in with any Google account.
+2. Click **Create API key**. Copy it — it looks like `AIza...`.
+3. Open Gmail. Click the gold **✦** button at the bottom-right.
+4. At the bottom of the side panel under **Gemini API key**, paste the
+   key and hit **Save**. It's stored in `chrome.storage.local` and
    stays on your machine.
+
+The free tier of AI Studio is usually plenty for personal email use.
+No billing setup required.
 
 ## Using Reply Fast
 
@@ -68,7 +73,7 @@ need a Google OAuth client ID bound to your extension's ID.
 2. Click the ✦ floating button to open the panel.
 3. Pick a tone (Professional / Friendly / Brief / Formal).
 4. Optionally type a custom instruction (e.g. *"decline politely"*,
-   *"ask for more details"*) — leave blank and Claude will figure it
+   *"ask for more details"*) — leave blank and Gemini will figure it
    out.
 5. Check **Check my calendar availability** if the email involves
    scheduling — you'll see the next week's events appear below.
@@ -83,6 +88,6 @@ need a Google OAuth client ID bound to your extension's ID.
   effect on any other site.
 - No data leaves your browser except: (a) calendar reads straight to
   Google, (b) the email subject/body/tone/instruction sent to the
-  Anthropic API as part of the draft prompt.
+  Gemini API as part of the draft prompt (also Google).
 - The API key is stored in Chrome's local extension storage, not
   synced across devices.

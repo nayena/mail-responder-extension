@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Reply Fast",
   "version": "1.0.0",
-  "description": "AI-powered Gmail assistant with Google Calendar integration. Draft replies with Claude in one click.",
+  "description": "AI-powered Gmail assistant with Google Calendar integration. Draft replies with Gemini in one click.",
   "permissions": [
     "identity",
     "storage",
@@ -12,7 +12,7 @@
   "host_permissions": [
     "https://mail.google.com/*",
     "https://www.googleapis.com/*",
-    "https://api.anthropic.com/*"
+    "https://generativelanguage.googleapis.com/*"
   ],
   "background": {
     "service_worker": "background.js"
