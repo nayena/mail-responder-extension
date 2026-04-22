@@ -35,7 +35,7 @@
     "128": "icons/icon128.png"
   },
   "oauth2": {
-    "client_id": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+    "client_id": "565405121036-ic4cokgkl59vme7os8nv1vpqevmmp1ij.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/gmail.readonly",
       "https://www.googleapis.com/auth/calendar.readonly"
